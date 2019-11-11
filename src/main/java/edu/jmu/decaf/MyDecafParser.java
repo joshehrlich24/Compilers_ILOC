@@ -382,9 +382,8 @@ class MyDecafParser extends DecafParser {
       if (tokens.size() == 0) {
          throw new InvalidSyntaxException("Missing integer at end of input");
       } else {
-         int i = true;
+         int i = 0;
          Token peek = (Token)tokens.peek();
-         int i;
          if (peek.type == Type.DEC) {
             this.consumeNextToken(tokens);
             i = Integer.parseInt(peek.text);

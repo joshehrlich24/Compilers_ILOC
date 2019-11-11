@@ -62,13 +62,58 @@ public class MyILOCGenerator extends ILOCGenerator
     @Override
     public void postVisit(ASTBinaryExpr node)
     {
+    	
+    	System.out.println(node.operator);
+    	
+    	//Add
     	ILOCOperand leftReg = getTempReg(node.leftChild);
     	ILOCOperand rightReg = getTempReg(node.rightChild);
     	ILOCOperand destReg = ILOCOperand.newVirtualReg();
     	copyCode(node, node.leftChild);
     	copyCode(node, node.rightChild);
     	emit(node, ILOCInstruction.Form.ADD, leftReg, rightReg, destReg);
-    	setTempReg(node, destReg);
+    	setTempReg(node, destReg);	
+    }
+    
+    @Override 
+    public void postVisit(ASTUnaryExpr expr)
+    {
+    	
+    }
+    
+    @Override 
+    public void postVisit(ASTFunctionCall call)
+    {
+    	
+    }
+    
+    @Override 
+    public void postVisit(ASTLocation loc)
+    {
+    	
+    }
+    
+    @Override 
+    public void postVisit(ASTAssignment assign)
+    {
+    	
+    }
+    
+    @Override 
+    public void postVisit(ASTVoidFunctionCall call)
+    {
+    	
+    }
+    
+    @Override 
+    public void postVisit(ASTVariable var)
+    {
+    	
+    }
+    
+    @Override 
+    public void postVisit(ASTConditional cond)
+    {
     	
     }
 
