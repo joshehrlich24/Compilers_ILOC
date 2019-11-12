@@ -23,15 +23,12 @@ public class MyILOCGenerator extends ILOCGenerator
     public void postVisit(ASTFunction node)
     {
         // TODO: emit prologue
-    	emit(node, ILOCInstruction.Form.PUSH, ILOCOperand.REG_BP);
-    	emit(node, ILOCInstruction.Form.I2I, ILOCOperand.REG_SP, ILOCOperand.REG_BP);
-    	emitLocalVarStackAdjustment(node); // allocate space for local variables (might be in the wrong spot)
+    	
+    	
         // propagate code from body block to the function level
         copyCode(node, node.body);
-        System.out.println(getCode(node));
 
         // TODO: emit epilogue
-        
     }
 
     @Override
@@ -41,7 +38,6 @@ public class MyILOCGenerator extends ILOCGenerator
         for (ASTStatement s : node.statements) {
             copyCode(node, s);
         }
-        
     }
 
     @Override
@@ -56,22 +52,20 @@ public class MyILOCGenerator extends ILOCGenerator
     	
         // TODO: handle return value and emit epilogue
         emit(node, ILOCInstruction.Form.RETURN);
-       //System.out.println(getCode(node));
+        
     }
     
     @Override
     public void postVisit(ASTLiteral node)
     {
-    	ILOCOperand reg = ILOCOperand.newVirtualReg();
+//    	ILOCOperand reg = ILOCOperand.newVirtualReg();
+    	
     	emit(node, ILOCInstruction.Form.LOAD_I, ILOCOperand.newIntConstant(((Integer) node.value).intValue()),
-    			reg);
-   
-    	
-    	setTempReg(node, reg);
-    	
+    			ILOCOperand.newVirtualReg());
     	copyCode(node, node.getParent());
+//    	setTempReg(node, reg);
     	
-    	//System.out.println(getCode(node));
+    	//System.out.println("Node code: " + getCode(node));
     }
     
     @Override
@@ -80,25 +74,34 @@ public class MyILOCGenerator extends ILOCGenerator
 
     	ILOCOperand leftReg;
     	ILOCOperand rightReg; 
-    	ILOCOperand destReg;
+    	ILOCOperand destReg; 
+
+    	System.out.println(node.operator);
     	
-    	leftReg = getTempReg(node.leftChild); 
-   	 	rightReg = getTempReg(node.rightChild);
-   	 	destReg = ILOCOperand.newVirtualReg();
-   	
-   	 	copyCode(node, node.leftChild);
-   	 	copyCode(node, node.rightChild);
-    	
-   	 	//System.out.println("BinaryExpr op --> " + node.operator);
-   	 	
     	switch(node.operator)
     	{
-    		case ADD:	 
-    	    	emit(node, ILOCInstruction.Form.ADD, leftReg, rightReg, destReg);
+    		case ADD:
+    			 leftReg = getTempReg(node.leftChild); 
+    	    	 rightReg = getTempReg(node.rightChild);
+    	    	 destReg = ILOCOperand.newVirtualReg();
     	    	
+    	    	copyCode(node, node.leftChild);
+    	    	copyCode(node, node.rightChild);
+    			
+    	    	emit(node, ILOCInstruction.Form.ADD, leftReg, rightReg, destReg);
+    	    	setTempReg(node, destReg);	
+    	    	
+    			System.out.println(getCode(node));
     			break;
     		
     		case SUB:
+    			
+    			 leftReg = getTempReg(node.leftChild); //Does all this code need to be in each case stmt
+    	    	 rightReg = getTempReg(node.rightChild);
+    	    	 destReg = ILOCOperand.newVirtualReg();
+    	    	
+    	    	copyCode(node, node.leftChild);
+    	    	copyCode(node, node.rightChild);
     			
     	    	emit(node, ILOCInstruction.Form.SUB, leftReg, rightReg, destReg);
     	    	setTempReg(node, destReg);
@@ -107,17 +110,20 @@ public class MyILOCGenerator extends ILOCGenerator
     		
     		case MUL:
     			
-    			
+    			leftReg = getTempReg(node.leftChild); //Does all this code need to be in each case stmt
+    			rightReg = getTempReg(node.rightChild);
+    			destReg = ILOCOperand.newVirtualReg();
    	    	 
     			emit(node, ILOCInstruction.Form.MULT, leftReg, rightReg, destReg);
-    			
     	    	setTempReg(node, destReg);
     			
         		break;
         		
     		case DIV:
     			
-    			
+    			leftReg = getTempReg(node.leftChild);
+    			rightReg = getTempReg(node.rightChild);
+    			destReg = ILOCOperand.newVirtualReg();
     			
     			emit(node, ILOCInstruction.Form.DIV, leftReg, rightReg, destReg);
     	    	setTempReg(node, destReg);
@@ -126,7 +132,9 @@ public class MyILOCGenerator extends ILOCGenerator
         		
     		case AND:
     			
-    			
+    			leftReg = getTempReg(node.leftChild); 
+    			rightReg = getTempReg(node.rightChild);
+    			destReg = ILOCOperand.newVirtualReg();
     			
     			emit(node, ILOCInstruction.Form.AND, leftReg, rightReg, destReg);
     	    	setTempReg(node, destReg);
@@ -135,7 +143,9 @@ public class MyILOCGenerator extends ILOCGenerator
     		
     		case EQ:
     			
-    			
+    			leftReg = getTempReg(node.leftChild); 
+    			rightReg = getTempReg(node.rightChild);
+    			destReg = ILOCOperand.newVirtualReg();
     			
     			emit(node, ILOCInstruction.Form.AND, leftReg, rightReg, destReg);
     	    	setTempReg(node, destReg);
@@ -144,7 +154,9 @@ public class MyILOCGenerator extends ILOCGenerator
 		
     		case GE:
     			
-    			
+    			leftReg = getTempReg(node.leftChild); 
+    			rightReg = getTempReg(node.rightChild);
+    			destReg = ILOCOperand.newVirtualReg();
     			
     			emit(node, ILOCInstruction.Form.AND, leftReg, rightReg, destReg);
     	    	setTempReg(node, destReg);
@@ -153,7 +165,9 @@ public class MyILOCGenerator extends ILOCGenerator
 		
     		case GT:
     			
-    			
+    			leftReg = getTempReg(node.leftChild); 
+    			rightReg = getTempReg(node.rightChild);
+    			destReg = ILOCOperand.newVirtualReg();
     			
     			emit(node, ILOCInstruction.Form.AND, leftReg, rightReg, destReg);
     	    	setTempReg(node, destReg);
@@ -162,7 +176,9 @@ public class MyILOCGenerator extends ILOCGenerator
 		
     		case LE:
     			
-    			
+    			leftReg = getTempReg(node.leftChild); 
+    			rightReg = getTempReg(node.rightChild);
+    			destReg = ILOCOperand.newVirtualReg();
     			
     			emit(node, ILOCInstruction.Form.AND, leftReg, rightReg, destReg);
     	    	setTempReg(node, destReg);
@@ -171,7 +187,9 @@ public class MyILOCGenerator extends ILOCGenerator
 		
     		case LT:
     			
-    			
+    			leftReg = getTempReg(node.leftChild); 
+    			rightReg = getTempReg(node.rightChild);
+    			destReg = ILOCOperand.newVirtualReg();
     			
     			emit(node, ILOCInstruction.Form.AND, leftReg, rightReg, destReg);
     	    	setTempReg(node, destReg);
@@ -186,7 +204,9 @@ public class MyILOCGenerator extends ILOCGenerator
 		
     		case NE:
 			
-    			
+    			leftReg = getTempReg(node.leftChild); 
+    			rightReg = getTempReg(node.rightChild);
+    			destReg = ILOCOperand.newVirtualReg();
     			
     			emit(node, ILOCInstruction.Form.AND, leftReg, rightReg, destReg);
     	    	setTempReg(node, destReg);
@@ -195,6 +215,9 @@ public class MyILOCGenerator extends ILOCGenerator
 		
     		case OR:
     			
+    			leftReg = getTempReg(node.leftChild); 
+    			rightReg = getTempReg(node.rightChild);
+    			destReg = ILOCOperand.newVirtualReg();
     			
     			emit(node, ILOCInstruction.Form.AND, leftReg, rightReg, destReg);
     	    	setTempReg(node, destReg);
@@ -219,31 +242,23 @@ public class MyILOCGenerator extends ILOCGenerator
     @Override 
     public void postVisit(ASTFunctionCall call)
     {
-    	// 1)load the arguments into registers 
-    			//loadAI [bp-4] => r5 {a} 	 --> if its a variable
-    			//loadI 2 => r6				 --> if its a literal
-    	// 2)Push the registers that contain the args onto the stack
-    	// push r6
-    	// push r5
-    	//Call the function --> funcCall(arg1, arg2);
-    	
-    	//When the function returns --> Deallocate space for parameters?
     	
     }
     
     @Override 
     public void postVisit(ASTLocation loc)
-    {	
-    	//loadAI
-    	emitLoad(loc);
+    {
+//    	System.out.println(loc);
+    	
+    	ILOCOperand destReg = ILOCOperand.newVirtualReg();
+    	setTempReg(loc, destReg);
     }
     
     @Override 
     public void postVisit(ASTAssignment assign)
-    {	
-    	ILOCOperand reg = ILOCOperand.newVirtualReg();
-  	
-    	emitStore(assign, reg); // Allocate space on the stack [bp - 4]
+    {
+    	System.out.println("Assign");
+    	
     }
     
     @Override 
@@ -255,19 +270,6 @@ public class MyILOCGenerator extends ILOCGenerator
     @Override 
     public void postVisit(ASTVariable var)
     {
-    	if(var.isArray)
-    	{
-    		//DoSomething()
-    	}
-    	
-    	else
-    	{
-    		//Local Variable 
-    		//Allocate -4 On the BP stack?
-    		
-    		
-    	}
-    	
     	
     }
     
